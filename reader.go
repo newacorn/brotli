@@ -44,6 +44,9 @@ func (r *Reader) Reset(src io.Reader) error {
 	}
 	return nil
 }
+func (r *Reader) NilSrc() {
+	r.src = nil
+}
 
 func (r *Reader) Read(p []byte) (n int, err error) {
 	if !decoderHasMoreOutput(r) && len(r.in) == 0 {

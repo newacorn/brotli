@@ -957,7 +957,14 @@ func decodeContextMap(context_map_size uint32, num_htrees *uint32, context_map_a
 
 		(*num_htrees)++
 		s.context_index = 0
-		*context_map_arg = make([]byte, uint(context_map_size))
+		//
+		//if len(*context_map_arg)
+		if cap(*context_map_arg) < int(context_map_size) {
+			*context_map_arg = make([]byte, context_map_size)
+		} else {
+			*context_map_arg = (*context_map_arg)[:context_map_size]
+		}
+		//
 		if *context_map_arg == nil {
 			return decoderErrorAllocContextMap
 		}
@@ -2176,7 +2183,9 @@ func decoderDecompressStream(s *Reader, available_in *uint, next_in *[]byte, ava
 			s.max_backward_distance = (1 << s.window_bits) - windowGap
 
 			/* Allocate memory for both block_type_trees and block_len_trees. */
-			s.block_type_trees = make([]huffmanCode, (3 * (huffmanMaxSize258 + huffmanMaxSize26)))
+			if s.block_len_trees == nil {
+				s.block_type_trees = make([]huffmanCode, (3 * (huffmanMaxSize258 + huffmanMaxSize26)))
+			}
 
 			if s.block_type_trees == nil {
 				result = decoderErrorAllocBlockTypeTrees

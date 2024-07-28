@@ -97,6 +97,7 @@ func (w *Writer) writeBlock(p []byte, lastBlock bool) (n int, err error) {
 func (w *Writer) Close() error {
 	w.writeBlock(w.inBuf, true)
 	w.inBuf = w.inBuf[:0]
+	w.Dest = nil
 	return w.err
 }
 

@@ -1,6 +1,9 @@
 package brotli
 
-import "io"
+import (
+	"io"
+	"unsafe"
+)
 
 /* Copyright 2015 Google Inc. All Rights Reserved.
 
@@ -198,26 +201,69 @@ func decoderStateInit(s *Reader) bool {
 	s.rb_roundtrips = 0
 	s.partial_pos_out = 0
 
-	s.block_type_trees = nil
-	s.block_len_trees = nil
+	if s.block_len_trees != nil {
+		MemClrNoHeapPointers(unsafe.Pointer(&s.block_type_trees[0]), uintptr(cap(s.block_len_trees))*unsafe.Sizeof(huffmanCode{}))
+	}
+	//s.block_type_trees = nil
+	//s.block_len_trees = nil
 	s.ringbuffer_size = 0
 	s.new_ringbuffer_size = 0
 	s.ringbuffer_mask = 0
 
-	s.context_map = nil
+	if cap(s.context_map) == 64 {
+		*(*[8]uint64)(unsafe.Pointer(&s.context_map[0])) = [8]uint64{}
+	} else {
+		//s.context_map = make([]byte, 0, 64)
+		s.context_map = make([]byte, 64)
+	}
+	//s.context_map = nil
 	s.context_modes = nil
-	s.dist_context_map = nil
+
+	if cap(s.dist_context_map) == 16 {
+		*(*[2]uint64)(unsafe.Pointer(&s.dist_context_map[0])) = [2]uint64{}
+	} else {
+		//s.dist_context_map = make([]byte, 0, 16)
+		s.dist_context_map = make([]byte, 16)
+	}
+	//s.dist_context_map = nil
+
 	s.context_map_slice = nil
 	s.dist_context_map_slice = nil
 
 	s.sub_loop_counter = 0
 
-	s.literal_hgroup.codes = nil
-	s.literal_hgroup.htrees = nil
-	s.insert_copy_hgroup.codes = nil
-	s.insert_copy_hgroup.htrees = nil
-	s.distance_hgroup.codes = nil
-	s.distance_hgroup.htrees = nil
+	if s.literal_hgroup.codes != nil {
+		MemClrNoHeapPointers(unsafe.Pointer(&s.literal_hgroup.codes[0]), uintptr(cap(s.literal_hgroup.codes))*unsafe.Sizeof(huffmanCode{}))
+	}
+	//s.literal_hgroup.codes = nil
+	if len(s.literal_hgroup.htrees) == 1 {
+		s.literal_hgroup.htrees[0] = nil
+	} else {
+		s.literal_hgroup.htrees = nil
+	}
+	//s.literal_hgroup.htrees = nil
+
+	if s.insert_copy_hgroup.codes != nil {
+		MemClrNoHeapPointers(unsafe.Pointer(&s.insert_copy_hgroup.codes[0]), uintptr(cap(s.literal_hgroup.codes))*unsafe.Sizeof(huffmanCode{}))
+	}
+	//s.insert_copy_hgroup.codes = nil
+	if len(s.insert_copy_hgroup.htrees) == 1 {
+		s.insert_copy_hgroup.htrees[0] = nil
+	} else {
+		s.insert_copy_hgroup.htrees = nil
+	}
+	//s.insert_copy_hgroup.htrees = nil
+	//
+	if s.literal_hgroup.codes != nil {
+		MemClrNoHeapPointers(unsafe.Pointer(&s.distance_hgroup.codes[0]), uintptr(cap(s.literal_hgroup.codes))*unsafe.Sizeof(huffmanCode{}))
+	}
+	//s.distance_hgroup.codes = nil
+	if len(s.distance_hgroup.htrees) == 1 {
+		s.distance_hgroup.htrees[0] = nil
+	} else {
+		s.distance_hgroup.htrees = nil
+	}
+	//s.distance_hgroup.htrees = nil
 
 	s.is_last_metablock = 0
 	s.is_uncompressed = 0
@@ -232,8 +278,8 @@ func decoderStateInit(s *Reader) bool {
 	s.dist_rb[2] = 11
 	s.dist_rb[3] = 4
 	s.dist_rb_idx = 0
-	s.block_type_trees = nil
-	s.block_len_trees = nil
+	//s.block_type_trees = nil
+	//s.block_len_trees = nil
 
 	s.symbol_lists.storage = s.symbols_lists_array[:]
 	s.symbol_lists.offset = huffmanMaxCodeLength + 1
@@ -258,29 +304,95 @@ func decoderStateMetablockBegin(s *Reader) {
 	s.block_type_rb[3] = 0
 	s.block_type_rb[4] = 1
 	s.block_type_rb[5] = 0
-	s.context_map = nil
+	if cap(s.context_map) == 64 {
+		*(*[8]uint64)(unsafe.Pointer(&s.context_map[0])) = [8]uint64{}
+	} else {
+		s.context_map = nil
+	}
+	//s.context_map = nil
 	s.context_modes = nil
-	s.dist_context_map = nil
+	if cap(s.dist_context_map) == 16 {
+		*(*[2]uint64)(unsafe.Pointer(&s.dist_context_map[0])) = [2]uint64{}
+	} else {
+		s.dist_context_map = nil
+	}
+	//s.dist_context_map = nil
 	s.context_map_slice = nil
 	s.literal_htree = nil
 	s.dist_context_map_slice = nil
 	s.dist_htree_index = 0
 	s.context_lookup = nil
-	s.literal_hgroup.codes = nil
-	s.literal_hgroup.htrees = nil
-	s.insert_copy_hgroup.codes = nil
-	s.insert_copy_hgroup.htrees = nil
-	s.distance_hgroup.codes = nil
-	s.distance_hgroup.htrees = nil
+	if s.literal_hgroup.codes != nil {
+		MemClrNoHeapPointers(unsafe.Pointer(&s.literal_hgroup.codes[0]), uintptr(cap(s.literal_hgroup.codes))*unsafe.Sizeof(huffmanCode{}))
+	}
+	//s.literal_hgroup.codes = nil
+	if len(s.literal_hgroup.htrees) == 1 {
+		s.literal_hgroup.htrees[0] = nil
+	} else {
+		s.literal_hgroup.htrees = nil
+	}
+	//s.literal_hgroup.htrees = nil
+	if s.insert_copy_hgroup.codes != nil {
+		MemClrNoHeapPointers(unsafe.Pointer(&s.insert_copy_hgroup.codes[0]), uintptr(cap(s.literal_hgroup.codes))*unsafe.Sizeof(huffmanCode{}))
+	}
+	//s.insert_copy_hgroup.codes = nil
+	if len(s.insert_copy_hgroup.htrees) == 1 {
+		s.insert_copy_hgroup.htrees[0] = nil
+	} else {
+		s.insert_copy_hgroup.htrees = nil
+	}
+	//s.insert_copy_hgroup.htrees = nil
+	//
+	if s.literal_hgroup.codes != nil {
+		MemClrNoHeapPointers(unsafe.Pointer(&s.distance_hgroup.codes[0]), uintptr(cap(s.literal_hgroup.codes))*unsafe.Sizeof(huffmanCode{}))
+	}
+	//s.distance_hgroup.codes = nil
+	if len(s.distance_hgroup.htrees) == 1 {
+		s.distance_hgroup.htrees[0] = nil
+	} else {
+		s.distance_hgroup.htrees = nil
+	}
+	//s.distance_hgroup.htrees = nil
 }
 
 func decoderStateCleanupAfterMetablock(s *Reader) {
 	s.context_modes = nil
-	s.context_map = nil
-	s.dist_context_map = nil
-	s.literal_hgroup.htrees = nil
-	s.insert_copy_hgroup.htrees = nil
-	s.distance_hgroup.htrees = nil
+	//
+
+	if cap(s.context_map) == 64 {
+		*(*[8]uint64)(unsafe.Pointer(&s.context_map[0])) = [8]uint64{}
+	} else {
+		s.context_map = nil
+	}
+	//s.context_map = nil
+	if cap(s.dist_context_map) == 16 {
+		*(*[2]uint64)(unsafe.Pointer(&s.dist_context_map[0])) = [2]uint64{}
+		//s.dist_context_map = s.dist_context_map[:0]
+	} else {
+		s.dist_context_map = nil
+	}
+	//
+
+	if len(s.literal_hgroup.htrees) == 1 {
+		s.literal_hgroup.htrees[0] = nil
+	} else {
+		s.literal_hgroup.htrees = nil
+	}
+
+	//s.literal_hgroup.htrees = nil
+	if len(s.insert_copy_hgroup.htrees) == 1 {
+		s.insert_copy_hgroup.htrees[0] = nil
+	} else {
+		s.insert_copy_hgroup.htrees = nil
+	}
+
+	//s.insert_copy_hgroup.htrees = nil
+	if len(s.distance_hgroup.htrees) == 1 {
+		s.distance_hgroup.htrees[0] = nil
+	} else {
+		s.distance_hgroup.htrees = nil
+	}
+	//s.distance_hgroup.htrees = nil
 }
 
 func decoderHuffmanTreeGroupInit(s *Reader, group *huffmanTreeGroup, alphabet_size uint32, max_symbol uint32, ntrees uint32) bool {
@@ -288,7 +400,19 @@ func decoderHuffmanTreeGroupInit(s *Reader, group *huffmanTreeGroup, alphabet_si
 	group.alphabet_size = uint16(alphabet_size)
 	group.max_symbol = uint16(max_symbol)
 	group.num_htrees = uint16(ntrees)
-	group.htrees = make([][]huffmanCode, ntrees)
-	group.codes = make([]huffmanCode, (uint(ntrees) * max_table_size))
+
+	//
+	if group.htrees == nil || uint32(cap(group.htrees)) < ntrees {
+		group.htrees = make([][]huffmanCode, ntrees)
+	} else {
+		group.htrees = group.htrees[:ntrees]
+	}
+	//
+	dstLen := (uint(ntrees) * max_table_size)
+	if group.codes == nil || uint(cap(group.codes)) < dstLen {
+		group.codes = make([]huffmanCode, dstLen)
+	} else {
+		group.codes = group.codes[:dstLen]
+	}
 	return !(group.codes == nil)
 }
