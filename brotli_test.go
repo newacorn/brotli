@@ -736,3 +736,42 @@ func TestEncodeM0Lazy(t *testing.T) {
 func BenchmarkEncodeM0Lazy(b *testing.B) {
 	benchmark(b, "testdata/Isaac.Newton-Opticks.txt", matchfinder.M0{Lazy: true}, 1<<16)
 }
+func TestWriteMultiplyBlockSizeData(t *testing.T) {
+	blockSize := 1 << 16
+	var dataBytes = [][]byte{nil, bytes.Repeat([]byte{'1'}, blockSize), bytes.Repeat([]byte{'2'}, blockSize*2)}
+	for _, dataByte := range dataBytes {
+		buf := bytes.Buffer{}
+		//w := NewWriterV2(&buf, 4)
+		w := NewWriterLevel(&buf, 4)
+		n, err := w.Write(dataByte)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if n != len(dataByte) {
+			t.Fatalf("expected %d but got %d", len(dataByte), n)
+		}
+		err = w.Close()
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		r := NewReader(&buf)
+		dst := make([]byte, len(dataByte))
+		p := dst
+		total := 0
+		for {
+			n1, err1 := r.Read(p)
+			if err1 != nil {
+				if err1 != io.EOF {
+					t.Fatal(err1)
+				}
+				break
+			}
+			total += n1
+			p = p[n1:]
+		}
+		if !bytes.Equal(dataByte, dst[:total]) {
+			t.Fatalf("expected %x but got %x", dataByte, dst[:total])
+		}
+	}
+}
