@@ -10,7 +10,9 @@
 // representation to allow mixing and matching compression components.
 package matchfinder
 
-import "io"
+import (
+	"io"
+)
 
 // A Match is the basic unit of LZ77 compression.
 type Match struct {
@@ -79,8 +81,14 @@ func (w *Writer) Write(p []byte) (n int, err error) {
 }
 
 func (w *Writer) writeBlock(p []byte, lastBlock bool) (n int, err error) {
+	if len(p) == 0 {
+		if !lastBlock {
+			return
+		}
+	} else {
+		w.matches = w.MatchFinder.FindMatches(w.matches[:0], p)
+	}
 	w.outBuf = w.outBuf[:0]
-	w.matches = w.MatchFinder.FindMatches(w.matches[:0], p)
 	w.outBuf = w.Encoder.Encode(w.outBuf, p, w.matches, lastBlock)
 	_, w.err = w.Dest.Write(w.outBuf)
 	return len(p), w.err

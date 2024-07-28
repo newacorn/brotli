@@ -9,6 +9,9 @@ type TextEncoder struct{}
 func (t TextEncoder) Reset() {}
 
 func (t TextEncoder) Encode(dst []byte, src []byte, matches []Match, lastBlock bool) []byte {
+	if len(src) == 0 {
+		return nil
+	}
 	pos := 0
 	for _, m := range matches {
 		if m.Unmatched > 0 {

@@ -20,6 +20,15 @@ func (e *Encoder) Encode(dst []byte, src []byte, matches []matchfinder.Match, la
 		e.bw.writeBits(4, 15)
 		e.wroteHeader = true
 	}
+	//
+	if len(src) == 0 {
+		if lastBlock {
+			e.bw.writeBits(2, 3) // islast + isempty
+			e.bw.jumpToByteBoundary()
+			return e.bw.dst
+		}
+		return nil
+	}
 
 	var literalHisto [256]uint32
 	var commandHisto [704]uint32
