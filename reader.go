@@ -55,10 +55,17 @@ func (r *Reader) Read(p []byte) (n int, err error) {
 		r.in = r.buf[:m]
 	}
 
+	var oldRin []byte
+	var re bool
 	if len(p) == 0 {
-		return 0, nil
+		re = true
+		if len(r.in) == 1 {
+			oldRin = r.in
+			p = []byte{'\000'}
+		} else {
+			return 0, nil
+		}
 	}
-
 	for {
 		var written uint
 		in_len := uint(len(r.in))
@@ -68,11 +75,24 @@ func (r *Reader) Read(p []byte) (n int, err error) {
 		result := decoderDecompressStream(r, &in_remaining, &r.in, &out_remaining, &p)
 		written = out_len - out_remaining
 		n = int(written)
+		//
+		if re {
+			if n == 0 && result == decoderResultSuccess {
+				err = io.EOF
+				return
+			} else {
+				r.in = oldRin
+				return
+			}
+		}
 
 		switch result {
 		case decoderResultSuccess:
 			if len(r.in) > 0 {
 				return n, errExcessiveInput
+			}
+			if n == 0 {
+				return 0, io.EOF
 			}
 			return n, nil
 		case decoderResultError:

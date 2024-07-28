@@ -775,3 +775,30 @@ func TestWriteMultiplyBlockSizeData(t *testing.T) {
 		}
 	}
 }
+
+func TestBrotliReaderEmptyData(t *testing.T) {
+	readPLen := [][]int{{0, 1, 0, 2, 4}, {2, 3, 0, 4}}
+	for _, pLen := range readPLen {
+		tmp := pLen
+		t.Run("read p len order: "+fmt.Sprintf("%v", pLen), func(t *testing.T) {
+			buf := bytes.Buffer{}
+			w := NewWriterV2(&buf, 4)
+			err := w.Close()
+			if err != nil {
+				t.Fatal(err)
+			}
+			r := NewReader(&buf)
+			for _, l1 := range tmp {
+				p := make([]byte, l1)
+				n1, err1 := r.Read(p)
+				if n1 != 0 {
+					t.Fatalf("expected %d but got %d", 0, n1)
+				}
+				if err1 != io.EOF {
+					t.Fatal(err1)
+				}
+			}
+		})
+
+	}
+}
