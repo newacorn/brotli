@@ -79,6 +79,9 @@ func (w *Writer) Write(p []byte) (n int, err error) {
 
 	return len(p), w.err
 }
+func (w *Writer) Flush() error {
+	return nil
+}
 
 func (w *Writer) writeBlock(p []byte, lastBlock bool) (n int, err error) {
 	if len(p) == 0 {
