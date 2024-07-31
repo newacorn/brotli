@@ -201,8 +201,11 @@ func decoderStateInit(s *Reader) bool {
 	s.rb_roundtrips = 0
 	s.partial_pos_out = 0
 
+	if s.block_type_trees != nil {
+		MemClrNoHeapPointers(unsafe.Pointer(&s.block_type_trees[0]), uintptr(cap(s.block_type_trees))*unsafe.Sizeof(huffmanCode{}))
+	}
 	if s.block_len_trees != nil {
-		MemClrNoHeapPointers(unsafe.Pointer(&s.block_type_trees[0]), uintptr(cap(s.block_len_trees))*unsafe.Sizeof(huffmanCode{}))
+		MemClrNoHeapPointers(unsafe.Pointer(&s.block_len_trees[0]), uintptr(cap(s.block_len_trees))*unsafe.Sizeof(huffmanCode{}))
 	}
 	//s.block_type_trees = nil
 	//s.block_len_trees = nil
@@ -244,7 +247,7 @@ func decoderStateInit(s *Reader) bool {
 	//s.literal_hgroup.htrees = nil
 
 	if s.insert_copy_hgroup.codes != nil {
-		MemClrNoHeapPointers(unsafe.Pointer(&s.insert_copy_hgroup.codes[0]), uintptr(cap(s.literal_hgroup.codes))*unsafe.Sizeof(huffmanCode{}))
+		MemClrNoHeapPointers(unsafe.Pointer(&s.insert_copy_hgroup.codes[0]), uintptr(cap(s.insert_copy_hgroup.codes))*unsafe.Sizeof(huffmanCode{}))
 	}
 	//s.insert_copy_hgroup.codes = nil
 	if len(s.insert_copy_hgroup.htrees) == 1 {
@@ -254,8 +257,8 @@ func decoderStateInit(s *Reader) bool {
 	}
 	//s.insert_copy_hgroup.htrees = nil
 	//
-	if s.literal_hgroup.codes != nil {
-		MemClrNoHeapPointers(unsafe.Pointer(&s.distance_hgroup.codes[0]), uintptr(cap(s.literal_hgroup.codes))*unsafe.Sizeof(huffmanCode{}))
+	if s.distance_hgroup.codes != nil {
+		MemClrNoHeapPointers(unsafe.Pointer(&s.distance_hgroup.codes[0]), uintptr(cap(s.distance_hgroup.codes))*unsafe.Sizeof(huffmanCode{}))
 	}
 	//s.distance_hgroup.codes = nil
 	if len(s.distance_hgroup.htrees) == 1 {
@@ -333,7 +336,7 @@ func decoderStateMetablockBegin(s *Reader) {
 	}
 	//s.literal_hgroup.htrees = nil
 	if s.insert_copy_hgroup.codes != nil {
-		MemClrNoHeapPointers(unsafe.Pointer(&s.insert_copy_hgroup.codes[0]), uintptr(cap(s.literal_hgroup.codes))*unsafe.Sizeof(huffmanCode{}))
+		MemClrNoHeapPointers(unsafe.Pointer(&s.insert_copy_hgroup.codes[0]), uintptr(cap(s.insert_copy_hgroup.codes))*unsafe.Sizeof(huffmanCode{}))
 	}
 	//s.insert_copy_hgroup.codes = nil
 	if len(s.insert_copy_hgroup.htrees) == 1 {
@@ -343,8 +346,8 @@ func decoderStateMetablockBegin(s *Reader) {
 	}
 	//s.insert_copy_hgroup.htrees = nil
 	//
-	if s.literal_hgroup.codes != nil {
-		MemClrNoHeapPointers(unsafe.Pointer(&s.distance_hgroup.codes[0]), uintptr(cap(s.literal_hgroup.codes))*unsafe.Sizeof(huffmanCode{}))
+	if s.distance_hgroup.codes != nil {
+		MemClrNoHeapPointers(unsafe.Pointer(&s.distance_hgroup.codes[0]), uintptr(cap(s.distance_hgroup.codes))*unsafe.Sizeof(huffmanCode{}))
 	}
 	//s.distance_hgroup.codes = nil
 	if len(s.distance_hgroup.htrees) == 1 {
