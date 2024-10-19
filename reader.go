@@ -44,6 +44,10 @@ func (r *Reader) Reset(src io.Reader) error {
 	}
 	return nil
 }
+func (r *Reader) Close() error {
+	r.src = nil
+	return nil
+}
 func (r *Reader) NilSrc() {
 	r.src = nil
 }
