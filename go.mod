@@ -1,4 +1,4 @@
-module github.com/andybalholm/brotli
+module github.com/newacorn/brotli
 
 go 1.13
 
